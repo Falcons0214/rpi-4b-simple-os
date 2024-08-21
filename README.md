@@ -1,0 +1,1 @@
+Note Link: https://hackmd.io/@Falcons0214/rpi4_os
