@@ -142,47 +142,47 @@ void mn_uart_write_hex(unsigned long value) {
         uart_write_blocking(temp[i]);
 }
 
-void mn_ctl_regs_dump() {
-    uint32_t reg = 0x0;
+// void mn_ctl_regs_dump() {
+//     uint32_t reg = 0x0;
 
-    reg = mmio_read32(AUX_IRQ);
-    mn_uart_write_hex(reg & 0x00000001);
-    mn_uart_write_txt("\n");
+//     reg = mmio_read32(AUX_IRQ);
+//     mn_uart_write_hex(reg & 0x00000001);
+//     mn_uart_write_txt("\n");
 
-    reg = mmio_read32(AUX_ENABLES);
-    mn_uart_write_hex(reg & 0x00000001);
-    mn_uart_write_txt("\n");
+//     reg = mmio_read32(AUX_ENABLES);
+//     mn_uart_write_hex(reg & 0x00000001);
+//     mn_uart_write_txt("\n");
 
-    reg = mmio_read32(AUX_MU_IER_REG);
-    mn_uart_write_hex(reg & AUX_MU_IER_ERI_MASK);
-    mn_uart_write_txt("\n");
-    mn_uart_write_hex(reg & AUX_MU_IER_ETI_MASK);
-    mn_uart_write_txt("\n");
+//     reg = mmio_read32(AUX_MU_IER_REG);
+//     mn_uart_write_hex(reg & AUX_MU_IER_ERI_MASK);
+//     mn_uart_write_txt("\n");
+//     mn_uart_write_hex(reg & AUX_MU_IER_ETI_MASK);
+//     mn_uart_write_txt("\n");
 
-    reg = mmio_read32(AUX_MU_IIR_REG);
-    mn_uart_write_hex(reg & 0x00000006);
-    mn_uart_write_txt("\n");
-    mn_uart_write_hex(reg & 0x00000001);
-    mn_uart_write_txt("\n");
+//     reg = mmio_read32(AUX_MU_IIR_REG);
+//     mn_uart_write_hex(reg & 0x00000006);
+//     mn_uart_write_txt("\n");
+//     mn_uart_write_hex(reg & 0x00000001);
+//     mn_uart_write_txt("\n");
 
-    reg = mmio_read32(AUX_MU_LCR_REG);
-    mn_uart_write_hex(reg & 0x00000040);
-    mn_uart_write_txt("\n");
-    mn_uart_write_hex(reg & 0x00000020);
-    mn_uart_write_txt("\n");
-    mn_uart_write_hex(reg & 0x00000001);
-    mn_uart_write_txt("\n");
+//     reg = mmio_read32(AUX_MU_LCR_REG);
+//     mn_uart_write_hex(reg & 0x00000040);
+//     mn_uart_write_txt("\n");
+//     mn_uart_write_hex(reg & 0x00000020);
+//     mn_uart_write_txt("\n");
+//     mn_uart_write_hex(reg & 0x00000001);
+//     mn_uart_write_txt("\n");
 
-    reg = mmio_read32(AUX_MU_LSR_REG);
-    mn_uart_write_hex(reg & 0x00000040);
-    mn_uart_write_txt("\n");
-    mn_uart_write_hex(reg & 0x00000020);
-    mn_uart_write_txt("\n");
-    mn_uart_write_hex(reg & 0x00000002);
-    mn_uart_write_txt("\n");
-    mn_uart_write_hex(reg & 0x00000001);
-    mn_uart_write_txt("\n");
-}
+//     reg = mmio_read32(AUX_MU_LSR_REG);
+//     mn_uart_write_hex(reg & 0x00000040);
+//     mn_uart_write_txt("\n");
+//     mn_uart_write_hex(reg & 0x00000020);
+//     mn_uart_write_txt("\n");
+//     mn_uart_write_hex(reg & 0x00000002);
+//     mn_uart_write_txt("\n");
+//     mn_uart_write_hex(reg & 0x00000001);
+//     mn_uart_write_txt("\n");
+// }
 
 void simple_shell() {
     char buf[32];

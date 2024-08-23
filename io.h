@@ -7,9 +7,9 @@
 #define REG_SIZE 4
 #define SYS_CLK_MU_UART 500000000
 
-#define PERIPHERAL_BASE 0xFE000000
-#define AUX_BASE  PERIPHERAL_BASE + 0x215000
-#define GPIO_BASE PERIPHERAL_BASE + 0x200000
+#define PERIPHERAL_BASE 0xFC000000
+#define AUX_BASE  PERIPHERAL_BASE + 0x2215000
+#define GPIO_BASE PERIPHERAL_BASE + 0x2200000
 
 /*--------------- mmio interface ---------------*/
 void mmio_set32(unsigned long reg, uint32_t value);
@@ -160,5 +160,25 @@ void simple_shell();
 /*--------------- GPIO Interface ---------------*/
 uint32_t gpio_set(uint32_t pin_number, uint32_t value,\
                   uint32_t base, uint32_t size);
+
+/*--------------- Mail Box ---------------*/
+/*
+ * MailBox 0
+ */
+#define MAILBOX_BASE  PERIPHERAL_BASE + 0x200b880
+#define MAILBOX_READ  MAILBOX_BASE
+#define MAILBOX_PEEK  MAILBOX_BASE + 0x10
+#define MAILBOX_SEND  MAILBOX_BASE + 0x14
+#define MAILBOX_STAT  MAILBOX_BASE + 0x18
+#define MAILBOX_CONF  MAILBOX_BASE + 0x1c
+
+// Mailbox 1
+#define MAILBOX_WRITE MAILBOX_BASE + 0x20
+
+#define MAILBOX_FULL  0x80000000
+#define MAILBOX_EMPTY 0x40000000
+
+int mb_request_a_tag(uint32_t channel, uint32_t tag, \
+                     uint32_t tag_size, uint32_t *buf);
 
 #endif
