@@ -13,9 +13,9 @@ int mb_request_a_tag(uint32_t channel, uint32_t tag, \
     mbox[2] = tag;
     mbox[3] = tag_size;
     mbox[4] = 0x0;
-    mbox[5] = 0x0;
-    mbox[6] = 0x00010003;
-    mbox[7] = 8;
+    // mbox[5] = 0x0;
+    // mbox[6] = 0x00010003;
+    // mbox[7] = 8;
 
     while (mmio_read32(MAILBOX_STAT) & MAILBOX_FULL);
     mmio_write32(MAILBOX_WRITE, re);
@@ -26,6 +26,6 @@ int mb_request_a_tag(uint32_t channel, uint32_t tag, \
             break;
     }
 
-    memcpy(buf, mbox, sizeof(uint32_t) * 16);
+    memcpy((char*)buf, (char*)mbox, sizeof(uint32_t) * 16);
     return 1;
 }

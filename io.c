@@ -184,6 +184,18 @@ void mn_uart_write_hex(unsigned long value) {
 //     mn_uart_write_txt("\n");
 // }
 
+void reboot() {
+    mmio_write32(WATCHDOG_BASE + PM_RSTC, PM_PASSWORD | 0x20);
+    mmio_write32(WATCHDOG_BASE + PM_WDOG, PM_PASSWORD | 10);
+}
+
+void do_command(char *buf) {
+    if (buf[0] == '1')
+        reboot();
+    else
+        mn_uart_write_txt("unknow\n");
+}
+
 void simple_shell() {
     char buf[32];
     uint32_t index, reg;
@@ -203,7 +215,8 @@ void simple_shell() {
             mn_uart_write_ch((char)reg);
             buf[index ++] = (char)reg;
         }
-        mn_uart_write_txt(buf);
-        mn_uart_write_txt("\n");
+        do_command(buf);
+        // mn_uart_write_txt(buf);
+        // mn_uart_write_txt("\n");
     }
 }
