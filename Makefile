@@ -9,11 +9,14 @@ all: clean kernel8.img
 boot.o: boot.S
 	$(GCCPATH)/aarch64-none-linux-gnu-gcc $(GCCFLAGS) -c boot.S -o boot.o
 
+sys_utils.o: sys_utils.S
+	$(GCCPATH)/aarch64-none-linux-gnu-gcc $(GCCFLAGS) -c sys_utils.S -o sys_utils.o
+
 %.o: %.c
 	$(GCCPATH)/aarch64-none-linux-gnu-gcc $(GCCFLAGS) -c $< -o $@
 
-kernel8.img: boot.o $(OFILES)
-	$(GCCPATH)/aarch64-none-linux-gnu-ld -nostdlib boot.o $(OFILES) -T link.ld -o kernel8.elf
+kernel8.img: sys_utils.o boot.o $(OFILES)
+	$(GCCPATH)/aarch64-none-linux-gnu-ld -nostdlib sys_utils.o boot.o $(OFILES) -T link.ld -o kernel8.elf
 	$(GCCPATH)/aarch64-none-linux-gnu-objcopy -O binary kernel8.elf kernel8.img
 
 clean:
