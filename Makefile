@@ -6,6 +6,9 @@ GCCPATH = /home/joseph/rpi/arm_toolchain/gcc-arm-toolchain/bin
 
 all: clean kernel8.img
 
+vtable.o: vtable.S
+	$(GCCPATH)/aarch64-none-linux-gnu-gcc $(GCCFLAGS) -c vtable.S -o vtable.o
+
 boot.o: boot.S
 	$(GCCPATH)/aarch64-none-linux-gnu-gcc $(GCCFLAGS) -c boot.S -o boot.o
 
@@ -15,8 +18,8 @@ sys_utils.o: sys_utils.S
 %.o: %.c
 	$(GCCPATH)/aarch64-none-linux-gnu-gcc $(GCCFLAGS) -c $< -o $@
 
-kernel8.img: sys_utils.o boot.o $(OFILES)
-	$(GCCPATH)/aarch64-none-linux-gnu-ld -nostdlib sys_utils.o boot.o $(OFILES) -T link.ld -o kernel8.elf
+kernel8.img: sys_utils.o boot.o vtable.o $(OFILES)
+	$(GCCPATH)/aarch64-none-linux-gnu-ld -nostdlib sys_utils.o boot.o vtable.o $(OFILES) -T link.ld -o kernel8.elf
 	$(GCCPATH)/aarch64-none-linux-gnu-objcopy -O binary kernel8.elf kernel8.img
 
 clean:

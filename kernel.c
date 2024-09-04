@@ -1,6 +1,7 @@
 #include "io.h"
 #include "utils.h"
 #include "sys_utils.h"
+#include "vtable.h"
 
 void user_task1(void) {
     mn_uart_write_txt("USER: Start\n");
@@ -31,10 +32,12 @@ void main() {
     show_curEL();
     mn_uart_write_txt("Switch From EL2 to El1 !\n");
 
-    switch_el1_to_el0(0x11000000);
+    unsigned long vector_base = vector_table_init();
+    mn_uart_write_hex(vector_base);
 
+    switch_el1_to_el0(0x11000000);
     // show_curEL();
-    mn_uart_write_txt("Switch From EL1 to El0 !\n");
+    mn_uart_write_txt("\nSwitch From EL1 to El0 !\n");
 
     // Enter in EL0.
     user_task1();
