@@ -3,21 +3,44 @@
 #include "sys_utils.h"
 #include "vtable.h"
 
+// void user_task1(void) {
+//     mn_uart_write_txt("USER: Start\n");
+
+//     unsigned int x = 0xabcdabcd;
+//     unsigned int size = sizeof(x);
+//     char *ptr = (char*)&x;
+    
+//     for (int i = 0; i < size; i ++) {
+//         mn_uart_write_hex(*(ptr + i));
+//         mn_uart_write_txt("\n");
+//     }
+
+//     mn_uart_write_txt("USER: Exit\n");
+//     return;
+// }
+
 void user_task1(void) {
-    mn_uart_write_txt("USER: Start\n");
+    mn_uart_write_txt("USER: Start !\n");
 
     unsigned int x = 0xabcdabcd;
     unsigned int size = sizeof(x);
     char *ptr = (char*)&x;
     
     for (int i = 0; i < size; i ++) {
+        if (i == 2) {
+            asm (
+                "svc 0xcfcf" : :
+            );
+        }
         mn_uart_write_hex(*(ptr + i));
         mn_uart_write_txt("\n");
     }
 
     mn_uart_write_txt("USER: Exit\n");
+    while (1);
     return;
 }
+
 
 
 void main() {
