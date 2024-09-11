@@ -41,7 +41,6 @@
 
 incomplete_excep_handler:
 
-
 .extern exception_entry 
 exception_handler:
     save_all
@@ -49,11 +48,26 @@ exception_handler:
     load_all
     eret
 
+.extern irq_entry
+irq_handler:
+    save_all
+    bl irq_entry
+    load_all
+    eret
+
+
+.extern serr_entry
+serr_handler:
+    save_all
+    bl serr_entry
+    load_all
+    eret
+
 .section .excp_vector, "axw"
 .align	11
 exception_vector_table:
     // Current EL with SP0
-    b incomplete_excep_handler
+    b incomplete_excep_handler 
     .align 7 
     b incomplete_excep_handler
     .align 7
@@ -75,11 +89,11 @@ exception_vector_table:
     // Lower EL using AArch64
     b exception_handler
     .align 7
-    b incomplete_excep_handler
+    b irq_handler
     .align 7
     b incomplete_excep_handler
     .align 7
-    b incomplete_excep_handler
+    b serr_handler
     .align 7
 
     // Lower EL using AArch32

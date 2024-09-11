@@ -11,6 +11,9 @@
 #define AUX_BASE  PERIPHERAL_BASE + 0x2215000
 #define GPIO_BASE PERIPHERAL_BASE + 0x2200000
 
+#define GICD_BASE PERIPHERAL_BASE + 0x3841000
+#define GICC_BASE PERIPHERAL_BASE + 0x3842000
+
 /*--------------- mmio interface ---------------*/
 void mmio_set32(unsigned long reg, uint32_t value);
 void mmio_clear32(unsigned long reg, uint32_t value);
@@ -195,5 +198,39 @@ int mb_request_a_tag(uint32_t channel, uint32_t tag, \
 #define PM_RSTC_WRCFG_SET		0x00000030
 #define PM_RSTC_WRCFG_FULL_RESET	0x00000020
 #define PM_RSTC_RESET			0x00000102
+
+
+/*--------------- GIC ---------------*/
+
+/*
+ * For GICD_ISENABLERn, we need check GICD_TYPER.ITLinesNumber.
+ * It define the maximum number of interrupts that the GIC supports.
+ */
+#define GICD_CTLR       GICD_BASE + 0x0000
+#define GICD_TYPER      GICD_BASE + 0x0004
+#define GICD_IGROUPR0   GICD_BASE + 0x0080
+#define GICD_ISENABLER0 GICD_BASE + 0x0100
+#define GICD_IPRIORITY0 GICD_BASE + 0x0400
+#define GICD_ITARGETSR0 GICD_BASE + 0x0800
+
+#define GICD_TYPER_ITLN_MASK 0x0000001f
+
+#define GET_ITARGETSR_N_BASE(INTID) \
+    (GICD_ITARGETSR0 + ((INTID) / 4) * 4)
+#define GET_ITARGETSR_OFFSET(INTID) ((INTID) % 4)
+
+#define GET_IPRIORITY_N_BASE(INTID) \
+    (GICD_IPRIORITY0 + ((INTID) / 4) * 4)
+#define GET_IPRIORITY_OFFSET(INTID) ((INTID) % 4)
+
+#define GET_INTR_NUM(ITLnum) (((ITLnum) + 1) * 32)
+
+#define GICC_CTLR GICC_BASE + 0x0000
+#define GICC_CTLR_ENABLE_GRP1 = 0x00000001
+
+#define GICC_IIDR GICC_BASE + 0x00fc
+#define ARCH_VER_MASK 0x000f0000
+
+void show_gic_ver(void);
 
 #endif

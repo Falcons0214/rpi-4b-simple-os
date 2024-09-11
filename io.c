@@ -220,3 +220,14 @@ void simple_shell() {
         // mn_uart_write_txt("\n");
     }
 }
+
+void show_gic_ver() {
+    uint32_t ver;
+    ver = mmio_read32(GICC_IIDR);
+
+    mn_uart_write_txt("GIC Version: ");
+    // mn_uart_write_hex((ver & ARCH_VER_MASK) >> 16);
+    mn_uart_write_hex(ver);
+    mn_uart_write_txt("\n");
+    return;
+}
