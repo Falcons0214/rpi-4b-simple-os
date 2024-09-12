@@ -54,7 +54,6 @@ void gic_init() {
     unsigned long gicd_itar;
 
     intids[index] = 125; // AUX IRQ SPI;
-    intids[index ++] = 30;  // PNS timer IRQ PPI;
     intids[index ++] = -1;
 
     for (int i = 0; intids[i] != -1; i ++) {
