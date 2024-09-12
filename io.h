@@ -210,6 +210,7 @@ int mb_request_a_tag(uint32_t channel, uint32_t tag, \
 #define GICD_TYPER      GICD_BASE + 0x0004
 #define GICD_IGROUPR0   GICD_BASE + 0x0080
 #define GICD_ISENABLER0 GICD_BASE + 0x0100
+#define GICD_ISACTIVER0 GICD_BASE + 0x0300
 #define GICD_IPRIORITY0 GICD_BASE + 0x0400
 #define GICD_ITARGETSR0 GICD_BASE + 0x0800
 
@@ -223,12 +224,23 @@ int mb_request_a_tag(uint32_t channel, uint32_t tag, \
     (GICD_IPRIORITY0 + ((INTID) / 4) * 4)
 #define GET_IPRIORITY_OFFSET(INTID) ((INTID) % 4)
 
+#define GET_ISACTIVE_N_BASE(INTID) \
+    (GICD_ISACTIVER0 + ((INTID) / 32) * 4)
+#define GET_ISACTIVE_OFFSET(INTID) ((INTID) % 32)
+
+
 #define GET_INTR_NUM(ITLnum) (((ITLnum) + 1) * 32)
 
 #define GICC_CTLR GICC_BASE + 0x0000
+#define GICC_IAR  GICC_BASE + 0x000c
+#define GICC_EOIR GICC_BASE + 0x0010
+#define GICC_IIDR GICC_BASE + 0x00fc
+#define GICC_DIR  GICC_BASE + 0x1000
+
 #define GICC_CTLR_ENABLE_GRP1 = 0x00000001
 
-#define GICC_IIDR GICC_BASE + 0x00fc
+#define GICC_IAR_INTID_MASK 0x000003ff
+
 #define ARCH_VER_MASK 0x000f0000
 
 void show_gic_ver(void);

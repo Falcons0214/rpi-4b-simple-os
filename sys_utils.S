@@ -13,7 +13,7 @@ switch_el2_to_el1:
 .global switch_el1_to_el0
 switch_el1_to_el0:
     msr sp_el0, x0
-    mov x0, 0x180
+    mov x0, #0x0
     msr spsr_el1, x0
     msr elr_el1, lr
     eret
@@ -32,13 +32,31 @@ _read_esr_el1:
     mrs x0, esr_el1
     ret
 
+.global _get_cbar_el1
+_get_cbar_el1:
+    mrs x0, s3_1_c15_c3_0
+    ret
+
+
+.global _get_cntfrq_el0
+_get_cntfrq_el0:
+    mrs x0, cntfrq_el0
+    ret
 
 .global _set_cntfrq_el0
 _set_cntfrq_el0:
     msr cntfrq_el0, x0
     ret
 
-.global _get_cbar_el1
-_get_cbar_el1:
-    mrs x0, s3_1_c15_c3_0
+.global _core_timer_init
+_core_timer_init:
+    mov x0, #0x00
+    msr cntkctl_el1, x0
+    mov x0, #0x01
+    msr cntp_ctl_el0, x0
+    ret
+
+.global _core_timer_set_exp
+_core_timer_set_exp:
+    msr cntp_tval_el0, x0
     ret

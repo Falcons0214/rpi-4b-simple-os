@@ -105,12 +105,25 @@ void gic_init() {
     return; 
 }
 
-void sys_timer_init() {
-
-
+/*
+ * Core Timer:
+ *
+ * 1. CNTFRQ_EL0: For frequency (50MHz)
+ * 2. CNTP_CTL_EL0
+ * 3. CNTP_CVAL_EL0
+ * 4. CNTPCT_EL0
+ */
+void core_timer_set_freq() {
+    _set_cntfrq_el0(50000000);
+}
+void core_timer_init() {
+    _core_timer_init();
+}
+void core_timer_set_expir_time(unsigned long sec) {
+    _core_timer_set_exp(sec * _get_cntfrq_el0());
 }
 
-void user_task1(void) {
+void task1(void) {
     mn_uart_write_txt("USER: Start !\n");
 
     unsigned int x = 0xabcdabcd;
@@ -132,34 +145,55 @@ void user_task1(void) {
     return;
 }
 
+// void task2() {
+//     while (1) {
+//         mn_uart_write_txt("Task 2\n");
+//     }
+// }
+
+// void task3() {
+//     while (1) {
+//         mn_uart_write_txt("Task 3\n");
+//     }
+// }
 
 void main() {
     mn_uart_init();
     mn_uart_write_txt("\033[2J\033[H");
     mn_uart_write_txt("Hello World !\n");
 
+    unsigned long vector_base = vector_table_init();
+    mn_uart_write_hex(vector_base);
+    mn_uart_write_txt("\n");
+
+    gic_init();
+    core_timer_init();
+
+    mn_uart_write_dec(_get_cntfrq_el0());
+    mn_uart_write_txt("!!\n");
+    
     show_curEL();
 
     mn_uart_write_txt("Switch From EL2 to El1 !\n");
     switch_el2_to_el1(0x10000000);
     /********** Below in EL1 **********/
 
-    //sys_timer_init();
-
     show_curEL();
-
-    unsigned long vector_base = vector_table_init();
-    mn_uart_write_hex(vector_base);
-    mn_uart_write_txt("\n");
-
-    gic_init();
+    // int (*tasks[4])(void);
+    // tasks[0] = task2;
+    // tasks[1] = task3;
+    // tasks[2] = NULL;
 
     mn_uart_write_txt("\nSwitch From EL1 to El0 !\n");
+
+    core_timer_set_expir_time((unsigned long)1);
     switch_el1_to_el0(0x11000000);
     /********** Below in EL0 **********/
 
-    // user_task1();
-    while(1);
+    // task1();
+    while (1) {
+        mn_uart_write_txt("USER !\n");
+    }
 
     return;
 }
