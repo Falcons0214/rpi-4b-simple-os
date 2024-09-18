@@ -3,6 +3,9 @@
 
 #define MAX_UART_BUF_LEN 64
 
+char msg_buf[MSG_LEN];
+unsigned int msg_cur, msg_tail;
+
 void mmio_set32(unsigned long reg, uint32_t value) {
     *((volatile uint32_t*)reg) |= value;
 }
@@ -35,6 +38,7 @@ uint32_t gpio_set(uint32_t pin_number, uint32_t value,\
 }
 
 void mn_uart_init() {
+    msg_cur = msg_tail = 0;
     /*
      * Set func5 for gpio 14, 15.  
      */
@@ -55,11 +59,7 @@ void mn_uart_init() {
 
     mmio_set32(AUX_ENABLES, 0x00000001);
     mmio_set32(AUX_MU_LCR_REG, 0x00000001);
-    /*
-     * Enable mini uart receive & transmit interrupt
-     */
-    mmio_set32(AUX_MU_IER_REG, AUX_MU_IER_ERI);
-    mmio_set32(AUX_MU_IER_REG, AUX_MU_IER_ETI);
+    // mmio_clear32(AUX_MU_LCR_REG, ~(0x00000080));
 
     /*
      * Clear receive * transmit FIFO
@@ -67,12 +67,50 @@ void mn_uart_init() {
     mmio_set32(AUX_MU_IIR_REG, AUX_MU_IIR_FIFI_CLR);
 
     /*
-     * Enable mini uart receiver * transmitter.
+     * Enable mini uart receiver & transmitter.
      */
     mmio_set32(AUX_MU_CNTL_REG, AUX_MU_CNTL_TE);
     mmio_set32(AUX_MU_CNTL_REG, AUX_MU_CNTL_RE);
 
+    enable_uart_rec_intr();
+    enable_uart_trans_intr();
+
     mmio_write32(AUX_MU_BAUD_REG, BADU_RATE(115200));
+}
+
+void isit_uart_intr_en() {
+    unsigned int val = mmio_read32(AUX_MU_IER_REG);
+    mn_uart_write_txt("mini uart IER state: ");
+    mn_uart_write_hex(val);
+    mn_uart_write_txt("\n");
+}
+
+void enable_uart_trans_intr() {
+    /*
+     * Enable mini uart transmit interrupt.
+     */
+    mmio_set32(AUX_MU_IER_REG, 0x00000001);
+}
+
+void enable_uart_rec_intr() {
+    /*
+     * Enable mini uart receive interrupt.
+     */
+    mmio_set32(AUX_MU_IER_REG, 0x00000002);
+}
+
+void disable_uart_trans_intr() {
+    /*
+     * Disnable mini uart transmit interrupt.
+     */
+    mmio_clear32(AUX_MU_IER_REG, ~AUX_MU_IER_ETI);
+}
+
+void disable_uart_rec_intr() {
+    /*
+     * Disnable mini uart receive interrupt.
+     */
+    mmio_clear32(AUX_MU_IER_REG, ~AUX_MU_IER_ERI);
 }
 
 uint32_t uart_is_write_ready() {
@@ -83,7 +121,7 @@ uint32_t uart_is_read_ready() {
     return mmio_read32(AUX_MU_LSR_REG) & 0x01;
 }
 
-void uart_write_blocking(unsigned char ch) {
+void uart_write_blocking(char ch) {
     while (!uart_is_write_ready());
     mmio_write32(AUX_MU_IO_REG, (uint32_t)ch);
 }
@@ -91,6 +129,30 @@ void uart_write_blocking(unsigned char ch) {
 uint32_t uart_read_blocking() {
     while (!uart_is_read_ready());
     return mmio_read32(AUX_MU_IO_REG);
+}
+
+int async_uart_buf_check(int len) {
+    if (msg_tail == msg_cur && msg_buf[msg_cur])
+        return 0;
+    if (msg_tail > msg_cur)
+        return (MSG_LEN - msg_tail + msg_cur >= len) ? 1 : 0;
+    else if (msg_tail < msg_cur)
+        return (msg_cur - msg_tail >= len) ? 1 : 0;
+    return 1;
+}
+
+int uart_write_nonblocking(char ch) {
+    if (ch == '\n') {
+        msg_buf[msg_tail ++] = '\r';
+        msg_tail %= MSG_LEN;
+    }
+    msg_buf[msg_tail ++] = ch;
+    msg_tail %= MSG_LEN;
+    return 1;
+}
+
+uint32_t uart_read_nonblocking() {
+    return 0;
 }
 
 uint32_t mn_uart_read_ch() {
@@ -107,6 +169,17 @@ void mn_uart_write_txt(char *buf) {
             uart_write_blocking('\r');
         uart_write_blocking(*buf++);
     }
+}
+
+// Async
+int mn_uart_async_write_txt(char *buf) {
+    /*
+     * Waiting for the buffer have enough space put string.
+     */
+    while (!async_uart_buf_check(strlen(buf)));
+    for (int i = 0; buf[i]; i ++)
+        uart_write_nonblocking(buf[i]);
+    return 1;
 }
 
 void mn_uart_write_dec(unsigned long value) {

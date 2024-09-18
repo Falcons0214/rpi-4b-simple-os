@@ -59,6 +59,7 @@ uint32_t mmio_read32(unsigned long reg);
 
 
 /*--------------- mini uart interface ---------------*/
+#define MSG_LEN 1024
 #define BADU_RATE(baud) ((SYS_CLK_MU_UART / (baud << 3)) - 1)
 
 void mn_uart_init();
@@ -68,7 +69,16 @@ void mn_uart_write_txt(char *buf);
 void mn_uart_write_dec(unsigned long value);
 void mn_uart_write_hex(unsigned long value);
 
+int mn_uart_async_write_txt(char *buf);
+uint32_t uart_is_write_ready(void);
+
 void mn_ctl_regs_dump();
+
+void enable_uart_trans_intr();
+void enable_uart_rec_intr();
+void disable_uart_trans_intr();
+void disable_uart_rec_intr();
+void isit_uart_intr_en();
 
 void simple_shell();
 
@@ -210,11 +220,31 @@ int mb_request_a_tag(uint32_t channel, uint32_t tag, \
 #define GICD_TYPER      GICD_BASE + 0x0004
 #define GICD_IGROUPR0   GICD_BASE + 0x0080
 #define GICD_ISENABLER0 GICD_BASE + 0x0100
+#define GICD_ICENABLER0 GICD_BASE + 0x0180
+#define GICD_ISPENDR0   GICD_BASE + 0x0200
+#define GICD_ICPENDR0   GICD_BASE + 0x0280
 #define GICD_ISACTIVER0 GICD_BASE + 0x0300
 #define GICD_IPRIORITY0 GICD_BASE + 0x0400
 #define GICD_ITARGETSR0 GICD_BASE + 0x0800
+#define GICD_ICFGR0     GICD_BASE + 0x0c00
 
 #define GICD_TYPER_ITLN_MASK 0x0000001f
+
+#define GET_ISENABLE_N_BASE(INTID) \
+    (GICD_ISENABLER0 + ((INTID) / 32) * 4)
+#define GET_ISENABLE_OFFSET(INTID) ((INTID) % 32)
+
+#define GET_ISACTIVE_N_BASE(INTID) \
+    (GICD_ISACTIVER0 + ((INTID) / 32) * 4)
+#define GET_ISACTIVE_OFFSET(INTID) ((INTID) % 32)
+
+#define GET_ICENABLE_N_BASE(INTID) \
+    (GICD_ICENABLER0 + ((INTID) / 32) * 4)
+#define GET_ICENABLE_OFFSET(INTID) ((INTID) % 32)
+
+#define GET_IGROUPR_N_BASE(INTID) \
+    (GICD_IGROUPR0 + ((INTID) / 32) * 4)
+#define GET_IGROUPR_OFFSET(INTID) ((INTID) % 32)
 
 #define GET_ITARGETSR_N_BASE(INTID) \
     (GICD_ITARGETSR0 + ((INTID) / 4) * 4)
@@ -228,10 +258,24 @@ int mb_request_a_tag(uint32_t channel, uint32_t tag, \
     (GICD_ISACTIVER0 + ((INTID) / 32) * 4)
 #define GET_ISACTIVE_OFFSET(INTID) ((INTID) % 32)
 
+#define GET_ISPEND_N_BASE(INTID) \
+    (GICD_ISPENDR0 + ((INTID) / 32) * 4)
+#define GET_ISPEND_OFFSET(INTID) ((INTID) % 32)
 
+#define GET_ICPEND_N_BASE(INTID) \
+    (GICD_ICPENDR0 + ((INTID) / 32) * 4)
+#define GET_ICPEND_OFFSET(INTID) ((INTID) % 32)
+
+#define GET_ICFG_N_BASE(INTID) \
+    (GICD_ICFGR0 + ((INTID) / 16) * 4)
+#define GET_ICFG_OFFSET(INTID) ((INTID) % 16)
+
+    
 #define GET_INTR_NUM(ITLnum) (((ITLnum) + 1) * 32)
 
 #define GICC_CTLR GICC_BASE + 0x0000
+#define GICC_PMR  GICC_BASE + 0x0004
+#define GICC_BPR  GICC_BASE + 0x0008
 #define GICC_IAR  GICC_BASE + 0x000c
 #define GICC_EOIR GICC_BASE + 0x0010
 #define GICC_IIDR GICC_BASE + 0x00fc

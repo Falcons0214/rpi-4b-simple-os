@@ -24,3 +24,8 @@ extern void _core_timer_set_exp(unsigned long sec);
  * GIC CPU interface registers.
  */
 extern unsigned long _get_cbar_el1(void);
+
+extern unsigned long _get_sp(void);
+
+extern void enable_irq(void);
+extern void disable_irq(void);

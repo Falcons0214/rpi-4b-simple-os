@@ -20,6 +20,16 @@ void buf_init(char *buf, uint32_t size) {
         buf[i] = '\0';
 }
 
+int strlen(char *s) {
+    int len = 0;
+    for (int i = 0; s[i]; s ++) {
+        if (s[i] == '\n')
+            len ++;
+        len ++;
+    }
+    return len;
+}
+
 void memcpy(char *dest, char *src, uint32_t size) {
     for (uint32_t i = 0; i < size; i ++)
         dest[i] = src[i];

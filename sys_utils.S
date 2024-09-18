@@ -60,3 +60,18 @@ _core_timer_init:
 _core_timer_set_exp:
     msr cntp_tval_el0, x0
     ret
+
+.global _get_sp
+_get_sp:
+    mov x0, sp
+    ret
+
+.globl enable_irq
+enable_irq:
+    msr daifclr, #2
+    ret
+
+.globl disable_irq
+disable_irq:
+    msr daifset, #2
+    ret
