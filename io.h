@@ -69,7 +69,7 @@ void mn_uart_write_txt(char *buf);
 void mn_uart_write_dec(unsigned long value);
 void mn_uart_write_hex(unsigned long value);
 
-int mn_uart_async_write_txt(char *buf);
+int uart_async_write_txt(char *buf);
 uint32_t uart_is_write_ready(void);
 
 void mn_ctl_regs_dump();
@@ -288,5 +288,7 @@ int mb_request_a_tag(uint32_t channel, uint32_t tag, \
 #define ARCH_VER_MASK 0x000f0000
 
 void show_gic_ver(void);
+void irq_enable(unsigned int intid);
+void irq_enable(unsigned int intid);
 
 #endif

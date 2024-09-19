@@ -117,7 +117,7 @@ void gic_init() {
     unsigned long gicd_pri;
     for (int i = 0; i < index; i ++) {
         gicd_pri = GET_IPRIORITY_N_BASE(intids[i]);
-        val = (0x10 << (GET_IPRIORITY_OFFSET(intids[i]) * 8));
+        val = (0xe0 << (GET_IPRIORITY_OFFSET(intids[i]) * 8));
         mmio_set32(gicd_pri, val);
 
         val = mmio_read32(GET_IPRIORITY_N_BASE(intids[i]));
@@ -152,7 +152,7 @@ void gic_init() {
     /*
      * Set the threshold of priority.
      */
-    mmio_set32(GICC_PMR, 0x000000ff);
+    mmio_set32(GICC_PMR, 0x000000f0);
 
     /*
      * Enable group 0 interrupt forwarding from Distribution to CPU.
@@ -172,7 +172,10 @@ void gic_init() {
  * 4. CNTPCT_EL0
  */
 void core_timer_set_freq() {
-    _set_cntfrq_el0(50000000);
+    /*
+     * RPI_b default timer freq is 54MHZ.
+     */
+    // _set_cntfrq_el0(50000000);
 }
 void core_timer_init() {
     _core_timer_init();
@@ -226,7 +229,6 @@ void main() {
 
     gic_init();
     // core_timer_init();
-    // enable_irq();
     
     isit_uart_intr_en();
     
@@ -251,12 +253,11 @@ void main() {
     /********** Below in EL0 **********/
 
     // task1();
-    while (1) {
-        mn_uart_async_write_txt("Async !\n");
-        // mn_uart_write_hex(mmio_read32(AUX_MU_IIR_REG) & 0x00000006);
-        // mn_uart_write_txt("\n");
-        // mn_uart_write_txt(ss);
+    for (int i = 0, ret; i < 10; i ++) {
+        ret = uart_async_write_txt("Async eifhoei---===fa oefjaoif j oiafjoeiafo !\n");
     }
+
+    while(1);
 
     return;
 }

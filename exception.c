@@ -17,7 +17,8 @@ void exception_entry(void) {
 
 void core_timer_hander() {
     unsigned long sec = 2;
-    mn_uart_write_txt("time up !\n");
+    // If writing buffer is fill the that will be ignore.
+    uart_async_write_txt("time up !\n");
     _core_timer_set_exp((sec * _get_cntfrq_el0()));
     return;
 }
@@ -60,21 +61,7 @@ void mini_uart_handler() {
 
 void irq_entry(void) {
     unsigned int intid;
-    // mn_uart_write_txt("IRQ Start !\n");
     intid = mmio_read32(GICC_IAR) & GICC_IAR_INTID_MASK;
-    // mn_uart_write_txt("IRQ INTID: ");
-    // mn_uart_write_dec(intid);
-    // mn_uart_write_txt("\n");
-
-    // unsigned long base, val;
-    // base = GET_ISPEND_N_BASE(125);
-    // val = mmio_read32(base);
-    // mn_uart_write_hex(base);
-    // mn_uart_write_txt("\n");
-    // mn_uart_write_hex(val);
-    // mn_uart_write_txt("\n");
-    // mn_uart_write_hex(mmio_read32(AUX_MU_IIR_REG));
-    // mn_uart_write_txt("\n");
 
     switch(intid) {
         case 30:
@@ -84,12 +71,10 @@ void irq_entry(void) {
             mini_uart_handler();
             break;
         default:
-            // mn_uart_write_txt("IRQ idle !\n");
             break;
     }
     mmio_set32(GICC_EOIR, intid);
     mmio_set32(GICC_DIR, intid);
-    // mn_uart_write_txt("IRQ End !\n");
     return;
 }
 

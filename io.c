@@ -1,10 +1,19 @@
 #include "io.h"
 #include "utils.h"
+#include "sys_utils.h"
 
 #define MAX_UART_BUF_LEN 64
 
 char msg_buf[MSG_LEN];
 unsigned int msg_cur, msg_tail;
+
+void irq_enable(unsigned int intid) {
+    mmio_set32(GET_ISENABLE_N_BASE(intid), (0x1 << GET_ISENABLE_OFFSET(intid)));
+}
+
+void irq_disable(unsigned int intid) {
+    mmio_set32(GET_ICENABLE_N_BASE(intid), (0x1 << GET_ICENABLE_OFFSET(intid)));
+}
 
 void mmio_set32(unsigned long reg, uint32_t value) {
     *((volatile uint32_t*)reg) |= value;
@@ -38,6 +47,8 @@ uint32_t gpio_set(uint32_t pin_number, uint32_t value,\
 }
 
 void mn_uart_init() {
+    for (int i = 0; i < MSG_LEN; i ++)
+        msg_buf[i] = '\0';
     msg_cur = msg_tail = 0;
     /*
      * Set func5 for gpio 14, 15.  
@@ -132,27 +143,39 @@ uint32_t uart_read_blocking() {
 }
 
 int async_uart_buf_check(int len) {
-    if (msg_tail == msg_cur && msg_buf[msg_cur])
+    if ((msg_tail == msg_cur && msg_buf[msg_tail]) || \
+        (msg_tail == msg_cur && len > MSG_LEN))
         return 0;
-    if (msg_tail > msg_cur)
-        return (MSG_LEN - msg_tail + msg_cur >= len) ? 1 : 0;
+    if (msg_tail == msg_cur && !msg_buf[msg_tail])
+        return 1;
+    else if (msg_tail > msg_cur)
+        return (MSG_LEN - msg_tail + msg_cur + 1 >= len) ? 1 : 0;
     else if (msg_tail < msg_cur)
         return (msg_cur - msg_tail >= len) ? 1 : 0;
-    return 1;
+    return 0;
 }
 
-int uart_write_nonblocking(char ch) {
-    if (ch == '\n') {
-        msg_buf[msg_tail ++] = '\r';
+// Async
+int uart_async_write_txt(char *buf) {
+    /*
+     * If writing Buffer is fill finction will return 0.
+     */
+    if(!async_uart_buf_check(strlen(buf)))
+        return 0;
+    for (int i = 0; buf[i]; i ++) {
+        if (buf[i] == '\n') {
+            msg_buf[msg_tail ++] = '\r';
+            msg_tail %= MSG_LEN;
+        }
+        msg_buf[msg_tail ++] = buf[i];
         msg_tail %= MSG_LEN;
     }
-    msg_buf[msg_tail ++] = ch;
-    msg_tail %= MSG_LEN;
     return 1;
 }
 
-uint32_t uart_read_nonblocking() {
-    return 0;
+// Async
+int uart_read_nonblocking(char *buf) {
+    return 1;
 }
 
 uint32_t mn_uart_read_ch() {
@@ -169,17 +192,6 @@ void mn_uart_write_txt(char *buf) {
             uart_write_blocking('\r');
         uart_write_blocking(*buf++);
     }
-}
-
-// Async
-int mn_uart_async_write_txt(char *buf) {
-    /*
-     * Waiting for the buffer have enough space put string.
-     */
-    while (!async_uart_buf_check(strlen(buf)));
-    for (int i = 0; buf[i]; i ++)
-        uart_write_nonblocking(buf[i]);
-    return 1;
 }
 
 void mn_uart_write_dec(unsigned long value) {
