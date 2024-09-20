@@ -38,6 +38,10 @@
     add sp, sp, 32 * 8
 .endm
 
+.macro	ventry	label
+.align	7
+b	\label
+.endm
 
 incomplete_excep_handler:
 
@@ -55,7 +59,6 @@ irq_handler:
     load_all
     eret
 
-
 .extern serr_entry
 serr_handler:
     save_all
@@ -67,44 +70,28 @@ serr_handler:
 .align	11
 exception_vector_table:
     // Current EL with SP0
-    b incomplete_excep_handler 
-    .align 7 
-    b incomplete_excep_handler
-    .align 7
-    b incomplete_excep_handler
-    .align 7
-    b incomplete_excep_handler
-    .align 7
+    ventry incomplete_excep_handler
+    ventry incomplete_excep_handler
+    ventry incomplete_excep_handler
+    ventry incomplete_excep_handler
 
     // Current EL with SPx
-    b incomplete_excep_handler
-    .align 7
-    b incomplete_excep_handler
-    .align 7
-    b incomplete_excep_handler
-    .align 7
-    b incomplete_excep_handler
-    .align 7
+    ventry incomplete_excep_handler
+    ventry incomplete_excep_handler
+    ventry incomplete_excep_handler
+    ventry incomplete_excep_handler
 
     // Lower EL using AArch64
-    b exception_handler
-    .align 7
-    b irq_handler
-    .align 7
-    b incomplete_excep_handler
-    .align 7
-    b serr_handler
-    .align 7
+    ventry exception_handler
+    ventry irq_handler
+    ventry incomplete_excep_handler
+    ventry serr_handler
 
     // Lower EL using AArch32
-    b incomplete_excep_handler
-    .align 7
-    b incomplete_excep_handler
-    .align 7
-    b incomplete_excep_handler
-    .align 7
-    b incomplete_excep_handler
-    .align 7
+    ventry incomplete_excep_handler
+    ventry incomplete_excep_handler
+    ventry incomplete_excep_handler
+    ventry incomplete_excep_handler
 
 .extern _excp_vector_start
 .global vector_table_init

@@ -1,3 +1,5 @@
+/********** ELx Switch **********/
+
 .section .text
 .global switch_el2_to_el1
 switch_el2_to_el1:
@@ -21,6 +23,8 @@ switch_el1_to_el0:
     eret
 // 0b0001-1000-0000
 
+/********** Other**********/
+
 .global _read_excp_number_by_elr1
 _read_excp_number_by_elr1:
     mrs x0, elr_el1
@@ -39,6 +43,23 @@ _get_cbar_el1:
     mrs x0, s3_1_c15_c3_0
     ret
 
+.global _get_sp
+_get_sp:
+    mov x0, sp
+    ret
+
+.globl enable_irq
+enable_irq:
+    msr daifclr, #2
+    ret
+
+.globl disable_irq
+disable_irq:
+    msr daifset, #2
+    ret
+
+
+/********** Timer **********/
 
 .global _get_cntfrq_el0
 _get_cntfrq_el0:
@@ -61,19 +82,4 @@ _core_timer_init:
 .global _core_timer_set_exp
 _core_timer_set_exp:
     msr cntp_tval_el0, x0
-    ret
-
-.global _get_sp
-_get_sp:
-    mov x0, sp
-    ret
-
-.globl enable_irq
-enable_irq:
-    msr daifclr, #2
-    ret
-
-.globl disable_irq
-disable_irq:
-    msr daifset, #2
     ret
