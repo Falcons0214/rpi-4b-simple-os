@@ -2,6 +2,7 @@
 #include "io.h"
 #include "sys_utils.h"
 #include "utils.h"
+#include "sched.h"
 
 void exception_entry(void) {
     unsigned long value;
@@ -15,11 +16,14 @@ void exception_entry(void) {
     return;
 }
 
-void core_timer_hander() {
+void core_timer_hander(unsigned long reg_stack_base) {
     unsigned long sec = 2;
-    // If writing buffer is fill the that will be ignore.
+    /*
+     * If writing buffer is fill the that will be ignore.
+     */ 
     uart_async_write_txt("time up !\n");
     _core_timer_set_exp((sec * _get_cntfrq_el0()));
+    timer_tick(reg_stack_base);
     return;
 }
 
@@ -59,13 +63,13 @@ void mini_uart_handler() {
     return;
 }
 
-void irq_entry(void) {
+void irq_entry(unsigned long reg_stack_base) {
     unsigned int intid;
     intid = mmio_read32(GICC_IAR) & GICC_IAR_INTID_MASK;
 
     switch(intid) {
         case 30:
-            core_timer_hander();
+            core_timer_hander(reg_stack_base);
             break;
         case 125:
             mini_uart_handler();

@@ -1,5 +1,7 @@
+#include "asm.h"
+
 .macro save_all
-    sub sp, sp, 32 * 8
+    sub sp, sp, #REG_FILE_SIZE
     stp x0, x1, [sp ,16 * 0]
     stp x2, x3, [sp ,16 * 1]
     stp x4, x5, [sp ,16 * 2]
@@ -35,7 +37,7 @@
     ldp x26, x27, [sp ,16 * 13]
     ldp x28, x29, [sp ,16 * 14]
     ldr x30, [sp, 16 * 15]
-    add sp, sp, 32 * 8
+    add sp, sp, #REG_FILE_SIZE
 .endm
 
 .macro	ventry	label
@@ -52,9 +54,15 @@ exception_handler:
     load_all
     eret
 
+/*
+ * !! When irq_entry returns, we need to check whether we restored
+ * the context of the process we interrupted or if we need to load
+ * the context of the next process and return to it.
+ */ 
 .extern irq_entry
 irq_handler:
     save_all
+    add x0, sp, #REG_FILE_SIZE
     bl irq_entry
     load_all
     eret

@@ -43,6 +43,26 @@ _get_cbar_el1:
     mrs x0, s3_1_c15_c3_0
     ret
 
+.global _get_elr_el1
+_get_elr_el1:
+    mrs x0, elr_el1
+    ret
+
+.global _get_spsr_el1
+_get_spsr_el1: 
+    mrs x0, spsr_el1
+    ret
+
+.global _set_elr_el1
+_set_elr_el1:
+    msr elr_el1, x0
+    ret
+
+.global _set_spsr_el1
+_set_spsr_el1:
+    msr spsr_el1, x0
+    ret
+
 .global _get_sp
 _get_sp:
     mov x0, sp

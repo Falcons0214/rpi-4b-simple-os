@@ -1,3 +1,3 @@
-void exception_entry(void);
-void irq_entry(void);
-void serr_entry(void);
+// void exception_entry(void);
+// void irq_entry(unsigned long   );
+// void serr_entry(void);

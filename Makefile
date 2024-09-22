@@ -15,11 +15,14 @@ boot.o: boot.S
 sys_utils.o: sys_utils.S
 	$(GCCPATH)/aarch64-none-linux-gnu-gcc $(GCCFLAGS) -c sys_utils.S -o sys_utils.o
 
+sched_s.o: sched_s.S
+	$(GCCPATH)/aarch64-none-linux-gnu-gcc $(GCCFLAGS) -c sched_s.S -o sched_s.o
+
 %.o: %.c
 	$(GCCPATH)/aarch64-none-linux-gnu-gcc $(GCCFLAGS) -c $< -o $@
 
-kernel8.img: sys_utils.o boot.o vtable.o $(OFILES)
-	$(GCCPATH)/aarch64-none-linux-gnu-ld -nostdlib sys_utils.o boot.o vtable.o $(OFILES) -T link.ld -o kernel8.elf
+kernel8.img: sys_utils.o boot.o vtable.o sched_s.o $(OFILES)
+	$(GCCPATH)/aarch64-none-linux-gnu-ld -nostdlib sys_utils.o boot.o vtable.o sched_s.o $(OFILES) -T link.ld -o kernel8.elf
 	$(GCCPATH)/aarch64-none-linux-gnu-objcopy -O binary kernel8.elf kernel8.img
 
 clean:

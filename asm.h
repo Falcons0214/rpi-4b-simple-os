@@ -1,0 +1,1 @@
+#define REG_FILE_SIZE 256
