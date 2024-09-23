@@ -83,8 +83,8 @@ void mn_uart_init() {
     mmio_set32(AUX_MU_CNTL_REG, AUX_MU_CNTL_TE);
     mmio_set32(AUX_MU_CNTL_REG, AUX_MU_CNTL_RE);
 
-    enable_uart_rec_intr();
-    enable_uart_trans_intr();
+    // enable_uart_rec_intr();
+    // enable_uart_trans_intr();
 
     mmio_write32(AUX_MU_BAUD_REG, BADU_RATE(115200));
 }
@@ -226,48 +226,6 @@ void mn_uart_write_hex(unsigned long value) {
     for (int i = index - 1; i >= 0; i--)
         uart_write_blocking(temp[i]);
 }
-
-// void mn_ctl_regs_dump() {
-//     uint32_t reg = 0x0;
-
-//     reg = mmio_read32(AUX_IRQ);
-//     mn_uart_write_hex(reg & 0x00000001);
-//     mn_uart_write_txt("\n");
-
-//     reg = mmio_read32(AUX_ENABLES);
-//     mn_uart_write_hex(reg & 0x00000001);
-//     mn_uart_write_txt("\n");
-
-//     reg = mmio_read32(AUX_MU_IER_REG);
-//     mn_uart_write_hex(reg & AUX_MU_IER_ERI_MASK);
-//     mn_uart_write_txt("\n");
-//     mn_uart_write_hex(reg & AUX_MU_IER_ETI_MASK);
-//     mn_uart_write_txt("\n");
-
-//     reg = mmio_read32(AUX_MU_IIR_REG);
-//     mn_uart_write_hex(reg & 0x00000006);
-//     mn_uart_write_txt("\n");
-//     mn_uart_write_hex(reg & 0x00000001);
-//     mn_uart_write_txt("\n");
-
-//     reg = mmio_read32(AUX_MU_LCR_REG);
-//     mn_uart_write_hex(reg & 0x00000040);
-//     mn_uart_write_txt("\n");
-//     mn_uart_write_hex(reg & 0x00000020);
-//     mn_uart_write_txt("\n");
-//     mn_uart_write_hex(reg & 0x00000001);
-//     mn_uart_write_txt("\n");
-
-//     reg = mmio_read32(AUX_MU_LSR_REG);
-//     mn_uart_write_hex(reg & 0x00000040);
-//     mn_uart_write_txt("\n");
-//     mn_uart_write_hex(reg & 0x00000020);
-//     mn_uart_write_txt("\n");
-//     mn_uart_write_hex(reg & 0x00000002);
-//     mn_uart_write_txt("\n");
-//     mn_uart_write_hex(reg & 0x00000001);
-//     mn_uart_write_txt("\n");
-// }
 
 void reboot() {
     mmio_write32(WATCHDOG_BASE + PM_RSTC, PM_PASSWORD | 0x20);

@@ -14,15 +14,17 @@ void init_task(void) {
     }
 
     mn_uart_write_txt("USER: Exit\n");
-    while (1);
+    while (1) {
+        mn_uart_write_txt("Task 1\n");
+    }
     return;
 }
 
-// void task2() {
-//     while (1) {
-//         mn_uart_write_txt("Task 2\n");
-//     }
-// }
+void task2() {
+    while (1) {
+        mn_uart_write_txt("Task 2\n");
+    }
+}
 
 // void task3() {
 //     while (1) {

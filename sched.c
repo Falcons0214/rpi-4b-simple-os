@@ -3,6 +3,8 @@
 #include "mm.h"
 #include "user.h"
 #include "sys_utils.h"
+#include "fork.h"
+#include "io.h"
 
 /*
  * This pointer will always point to the process task structure
@@ -20,11 +22,11 @@ struct task_struct *task_map[NR_TASKS];
  */
 int nr_tasks;
 
-void sched_init() {
-    nr_tasks = 1;
-    current = FIRST_TASK;
+void sched_init(unsigned long init_task) {
+    nr_tasks = 0;
+	copy_process(init_task, 0);
+	current = task_map[0];
 
-    task_map[0] = (struct task_struct*)get_free_page();
     for (int i = 1; i < NR_TASKS; i ++)
         task_map[i] = NULL;
 }
@@ -54,7 +56,7 @@ void switch_to(struct task_struct *next, unsigned long reg_stack_base)
 	struct task_struct *prev = current;
 	struct cpu_context *prev_cnx, *cur_cnx;
 	current = next;
-	
+
 	/*
 	 * First we need copy the prev process state from 
 	 * `reg_stack_base` + #REG_FILE_SIZE to its task block.
@@ -64,11 +66,12 @@ void switch_to(struct task_struct *next, unsigned long reg_stack_base)
 	prev_cnx = &prev->cpu_context;
 	unsigned long *base = (unsigned long*)reg_stack_base;
 	for (int i = 0; i < 29; i ++)
-		prev_cnx->general_regs[i] = *(base + i);
-	prev_cnx->fp = *(base + 29);
-	prev_cnx->lr = *(base + 30);
+		prev_cnx->general_regs[i] = *(base - i);
+	prev_cnx->fp = *(base - 29);
+	prev_cnx->lr = *(base - 30);
 	prev_cnx->spsr_el1 = _get_spsr_el1();
 	prev_cnx->elr_el1 = _get_elr_el1();
+	prev_cnx->sp_el0 = _get_sp_el0();
 
 	/*
 	 * Second we put new task register file & update 
@@ -77,15 +80,16 @@ void switch_to(struct task_struct *next, unsigned long reg_stack_base)
 	 */
 	cur_cnx = &current->cpu_context;
 	for (int i = 0; i < 29; i ++)
-		*(base + i) = cur_cnx->general_regs[i];
-	*(base + 29) = cur_cnx->fp;
-	*(base + 30) = cur_cnx->lr;
+		*(base - i) = cur_cnx->general_regs[i];
+	*(base - 29) = cur_cnx->fp;
+	*(base - 30) = cur_cnx->lr;
 	_set_spsr_el1(cur_cnx->spsr_el1);
 	_set_elr_el1(cur_cnx->elr_el1);
+	_set_sp_el0(cur_cnx->sp_el0);
 }
 
 /*
- * This scheduler is copy fomr Linux Kernel 0.0.1
+ * This scheduler is copy from Linux Kernel 0.0.1
  */
 void _schedule(unsigned long reg_stack_base) {
 	preempt_disable();
@@ -95,7 +99,7 @@ void _schedule(unsigned long reg_stack_base) {
 	while (1) {
 		c = -1;
 		next = 0;
-		for (int i = 0; i < NR_TASKS; i++){
+		for (int i = 0; i < NR_TASKS; i ++){
 			p = task_map[i];
 			if (p && p->state == TASK_RUNNING && p->counter > c) {
 				c = p->counter;
@@ -105,7 +109,7 @@ void _schedule(unsigned long reg_stack_base) {
 		if (c) {
 			break;
 		}
-		for (int i = 0; i < NR_TASKS; i++) {
+		for (int i = 0; i < NR_TASKS; i ++) {
 			p = task_map[i];
 			if (p) {
 				p->counter = (p->counter >> 1) + p->priority;
@@ -123,7 +127,7 @@ void timer_tick(unsigned long reg_stack_base) {
 		return;
 	}
 	current->counter = 0;
-	// enable_irq();
+	enable_irq();
 	_schedule(reg_stack_base);
-	// disable_irq();
+	disable_irq();
 }

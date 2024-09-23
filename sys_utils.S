@@ -16,12 +16,11 @@ switch_el2_to_el1:
 .section .text
 .global switch_el1_to_el0
 switch_el1_to_el0:
-    msr sp_el0, x0
+    msr sp_el0, x1
+    msr elr_el1, x0
     mov x0, #0x0
     msr spsr_el1, x0
-    msr elr_el1, lr
     eret
-// 0b0001-1000-0000
 
 /********** Other**********/
 
@@ -43,6 +42,11 @@ _get_cbar_el1:
     mrs x0, s3_1_c15_c3_0
     ret
 
+.global _get_sp_el0
+_get_sp_el0:
+    mrs x0, sp_el0
+    ret
+
 .global _get_elr_el1
 _get_elr_el1:
     mrs x0, elr_el1
@@ -51,6 +55,11 @@ _get_elr_el1:
 .global _get_spsr_el1
 _get_spsr_el1: 
     mrs x0, spsr_el1
+    ret
+
+.global _set_sp_el0
+_set_sp_el0:
+    msr sp_el0, x0
     ret
 
 .global _set_elr_el1

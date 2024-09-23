@@ -17,12 +17,13 @@ void exception_entry(void) {
 }
 
 void core_timer_hander(unsigned long reg_stack_base) {
-    unsigned long sec = 2;
+    unsigned long sec = 1;
     /*
      * If writing buffer is fill the that will be ignore.
      */ 
-    uart_async_write_txt("time up !\n");
-    _core_timer_set_exp((sec * _get_cntfrq_el0()));
+    // uart_async_write_txt("time up !\n");
+    mn_uart_write_txt("time up !\n");
+    _core_timer_set_exp((sec * _get_cntfrq_el0()) >> 1);
     timer_tick(reg_stack_base);
     return;
 }
